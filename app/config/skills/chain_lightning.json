@@ -1,0 +1,33 @@
+{
+  "Name": "Chain Lightning",
+  "BaseCooldown": 19,
+  "RelicBonusPercent": 12,
+
+  "Levels": [
+    {
+      "Level": 1,
+      "MagicalPercents": 120,
+      "PhysicalPercents": 70
+    },
+    {
+      "Level": 2,
+      "MagicalPercents": 135,
+      "PhysicalPercents": 80
+    },
+    {
+      "Level": 3,
+      "MagicalPercents": 150,
+      "PhysicalPercents": 90
+    },
+    {
+      "Level": 4,
+      "MagicalPercents": 170,
+      "PhysicalPercents": 100
+    },
+    {
+      "Level": 5,
+      "MagicalPercents": 190,
+      "PhysicalPercents": 115
+    }
+  ]
+}

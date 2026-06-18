@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Калькулятор ловчего</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar">
+        <div class="brand">
+          <img src="/static/icons/base/BeastAwakeningFramed.png" alt="" />
+          <div>
+            <h1>Калькулятор ловчего</h1>
+            <p>FastAPI версия расчета ДПМ героя и Луны</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="export-build" type="button">Экспорт JSON</button>
+          <button id="import-build" type="button">Импорт JSON</button>
+          <button id="load-default" type="button">Пример</button>
+          <button id="load-empty" type="button">Очистить</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden />
+        </div>
+      </section>
+
+      <section class="layout">
+        <aside class="results">
+          <div class="result-total">
+            <span>ДПМ</span>
+            <strong id="total-dpm">0</strong>
+          </div>
+          <div class="split">
+            <div>
+              <span>Герой</span>
+              <strong id="hero-dpm">0</strong>
+            </div>
+            <div>
+              <span>Луна</span>
+              <strong id="luna-dpm">0</strong>
+            </div>
+          </div>
+          <div class="panel">
+            <h2>Источники</h2>
+            <div id="breakdown" class="breakdown"></div>
+          </div>
+          <div class="panel">
+            <h2>Итоговые статы</h2>
+            <div id="final-stats" class="stat-list"></div>
+          </div>
+        </aside>
+
+        <section class="workspace">
+          <nav class="tabs" id="tabs"></nav>
+          <div id="content" class="content"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "Name": "Bestial Rampage",
+  "BaseCooldown": 26,
+
+  "Levels": [
+    {
+      "Level": 1,
+      "TimeActive": 8,
+      "DamagePercents": 110,
+      "AttackSpeedPercents": 10
+    },
+    {
+      "Level": 2,
+      "TimeActive": 9,
+      "DamagePercents": 115,
+      "AttackSpeedPercents": 15
+    },
+    {
+      "Level": 3,
+      "TimeActive": 9,
+      "DamagePercents": 120,
+      "AttackSpeedPercents": 20
+    },
+    {
+      "Level": 4,
+      "TimeActive": 10,
+      "DamagePercents": 125,
+      "AttackSpeedPercents": 30
+    }
+  ],
+
+  "TalentAttackSpeedPercents": 2
+}

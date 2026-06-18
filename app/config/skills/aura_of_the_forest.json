@@ -1,0 +1,29 @@
+{
+  "Name": "Aura of the Forest",
+
+  "BaseCooldown": 24,
+  "TimeActive": 10,
+  "Delay": 2,
+
+  "Levels": [
+    {
+      "Level": 1,
+      "Percents": 35
+    },
+    {
+      "Level": 2,
+      "Percents": 45
+    },
+    {
+      "Level": 3,
+      "Percents": 60
+    },
+    {
+      "Level": 4,
+      "Percents": 80
+    }
+  ],
+
+  "BaseIncrease": 20,
+  "TalentPowerOfNature": 15
+}

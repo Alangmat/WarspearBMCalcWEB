@@ -1,0 +1,29 @@
+{
+  "Name": "Double Concentration",
+  "BaseCooldown": 22,
+
+  "Levels": [
+    {
+      "Level": 1,
+      "AdditionCriticalDamage": 8,
+      "AdditionSkillCooldown": 16
+    },
+    {
+      "Level": 2,
+      "AdditionCriticalDamage": 12,
+      "AdditionSkillCooldown": 24
+    },
+    {
+      "Level": 3,
+      "AdditionCriticalDamage": 16,
+      "AdditionSkillCooldown": 32
+    },
+    {
+      "Level": 4,
+      "AdditionCriticalDamage": 24,
+      "AdditionSkillCooldown": 40
+    }
+  ],
+
+  "TalentDeadlyDexterityAttackSpeedFactor": 60
+}

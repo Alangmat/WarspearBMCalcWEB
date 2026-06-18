@@ -1,0 +1,43 @@
+{
+  "Name":  "Moon touch",
+  "BaseCooldown": 11,
+  "RelicBonusPercent": 12,
+  "TalentPlusBonus": 5,
+  "Levels": [
+    {
+      "Level": 1,
+      "PercentDamage": 140,
+      "BaseDamage": 50,
+      "Duration": 4,
+      "PercentDamageLuna": 7
+    },
+    {
+      "Level": 2,
+      "PercentDamage": 155,
+      "BaseDamage": 70,
+      "Duration": 5,
+      "PercentDamageLuna": 9
+    },
+    {
+      "Level": 3,
+      "PercentDamage": 1700,
+      "BaseDamage": 90,
+      "Duration": 5,
+      "PercentDamageLuna": 11
+    },
+    {
+      "Level": 4,
+      "PercentDamage": 185,
+      "BaseDamage": 115,
+      "Duration": 6,
+      "PercentDamageLuna": 13
+    },
+    {
+      "Level": 5,
+      "PercentDamage": 200,
+      "BaseDamage": 140,
+      "Duration": 6,
+      "PercentDamageLuna": 15
+    }
+  ]
+}

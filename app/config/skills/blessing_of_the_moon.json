@@ -1,0 +1,32 @@
+{
+  "Name": "Blessing of the Moon",
+  "BaseCooldown": 25,
+
+  "Levels": [
+    {
+      "Level": 1,
+      "AdditionCriticalHit": 8,
+      "AdditionPenetration": 5
+    },
+    {
+      "Level": 2,
+      "AdditionCriticalHit": 10,
+      "AdditionPenetration": 6
+    },
+    {
+      "Level": 3,
+      "AdditionCriticalHit": 13,
+      "AdditionPenetration": 7
+    },
+    {
+      "Level": 4,
+      "AdditionCriticalHit": 16,
+      "AdditionPenetration": 8
+    }
+  ],
+
+  "Talents": {
+    "PlusPenetration": 1,
+    "PlusCriticalHit": 2
+  }
+}

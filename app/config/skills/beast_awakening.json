@@ -1,0 +1,44 @@
+{
+  "Name": "Beast Awakening",
+  "BaseDelay": 2.5,
+
+  "TalentMageBonus": 3,
+  "TalentPhysBonuses": {
+    "1": 1.5,
+    "2": 3,
+    "3": 4.5
+  },
+
+  "Levels": [
+    {
+      "Level": 1,
+      "BaseDamage": 20,
+      "CoefficientMagicalDamage": 35,
+      "CoefficientPhysicalDamage": 70
+    },
+    {
+      "Level": 2,
+      "BaseDamage": 30,
+      "CoefficientMagicalDamage": 45,
+      "CoefficientPhysicalDamage": 80
+    },
+    {
+      "Level": 3,
+      "BaseDamage": 40,
+      "CoefficientMagicalDamage": 55,
+      "CoefficientPhysicalDamage": 90
+    },
+    {
+      "Level": 4,
+      "BaseDamage": 50,
+      "CoefficientMagicalDamage": 65,
+      "CoefficientPhysicalDamage": 100
+    },
+    {
+      "Level": 5,
+      "BaseDamage": 60,
+      "CoefficientMagicalDamage": 75,
+      "CoefficientPhysicalDamage": 110
+    }
+  ]
+}

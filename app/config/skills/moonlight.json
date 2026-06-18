@@ -1,0 +1,40 @@
+{
+  "Name": "Moonlight",
+  "BaseCooldown": 14,
+
+  "Levels": [
+    {
+      "Level": 1,
+      "Percents": 20
+    },
+    {
+      "Level": 2,
+      "Percents": 25
+    },
+    {
+      "Level": 3,
+      "Percents": 30
+    },
+    {
+      "Level": 4,
+      "Percents": 40
+    }
+  ],
+
+  "Talents": {
+    "Levels": [
+      {
+        "Level": 1,
+        "Percents": 3
+      },
+      {
+        "Level": 2,
+        "Percents": 6
+      },
+      {
+        "Level": 3,
+        "Percents": 9
+      }
+    ]
+  }
+}

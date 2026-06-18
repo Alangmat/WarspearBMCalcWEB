@@ -1,0 +1,62 @@
+{
+  "Name": "Order to Attack",
+  "BaseCooldown": 10,
+
+  "Levels": [
+    {
+      "Level": 1,
+      "Percents": 20
+    },
+    {
+      "Level": 2,
+      "Percents": 25
+    },
+    {
+      "Level": 3,
+      "Percents": 30
+    },
+    {
+      "Level": 4,
+      "Percents": 40
+    },
+    {
+      "Level": 5,
+      "Percents": 50
+    }
+  ],
+
+  "Talents": {
+    "GuardianUnity": {
+      "Levels": [
+        {
+          "Level": 1,
+          "Percents": 1
+        },
+        {
+          "Level": 2,
+          "Percents": 2
+        },
+        {
+          "Level": 3,
+          "Percents": 3
+        }
+      ]
+    },
+    "DualRage": {
+      "Levels": [
+        {
+          "Level": 1,
+          "Percents": 1
+        },
+        {
+          "Level": 2,
+          "Percents": 2
+        },
+        {
+          "Level": 3,
+          "Percents": 3
+        }
+      ]
+    }
+  }
+}
