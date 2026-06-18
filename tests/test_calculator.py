@@ -5,6 +5,25 @@ from app.services.calculator import calculator
 from app.services.state_rules import normalize_dataset
 
 
+def source_sum(result) -> int:
+    return sum(
+        [
+            result.skills.attack.dpm,
+            result.skills.moon_touch.dpm,
+            result.skills.chain_lightning.dpm,
+            result.skills.beast_awakening.dpm,
+            result.skills.bestial_rampage.dpm,
+            result.skills.order_to_attack.dpm,
+            result.skills.aura_luna.dpm,
+            result.skills.aura_hero.dpm,
+            result.skills.moonlight_permanent.dpm,
+            result.skills.moonlight_non_permanent.dpm,
+            result.skills.symbiosis_hero,
+            result.skills.symbiosis_luna,
+        ]
+    )
+
+
 def test_empty_dataset_has_zero_dpm() -> None:
     result = calculator.calculate(DataSetBM())
 
@@ -19,8 +38,14 @@ def test_default_dataset_snapshot() -> None:
     assert result.totals.total == 128646
     assert result.totals.hero == 61913
     assert result.totals.luna == 66733
-    assert result.skills.attack.dpm == 18839
+    assert result.skills.attack.dpm == 31638
     assert result.skills.beast_awakening.dpm == 24266
+
+
+def test_source_breakdown_matches_total_dpm() -> None:
+    result = calculator.calculate(default_dataset())
+
+    assert source_sum(result) == result.totals.total
 
 
 def test_branch_normalization_clears_disabled_talents() -> None:

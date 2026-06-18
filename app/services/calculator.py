@@ -849,8 +849,9 @@ class BeastMasterCalculator:
         coeffs_final = self._coef_critical_hit_auto(state) * self._coef_accuracy(state) * self._coef_bp(state) * self._coef_sacred_hero(state)
         hit = cint(self._attack_formula(state, magedd, physdd) * coeffs_start)
         dpm = cint(hit / self._attack_delay(state) * 60)
-        state.breakdown.attack = DamageLine(hit=hit, dpm=dpm)
-        return cint(dpm * coeffs_final)
+        final_dpm = cint(dpm * coeffs_final)
+        state.breakdown.attack = DamageLine(hit=hit, dpm=final_dpm)
+        return final_dpm
 
     def _calc_moon_touch(self, state: CalcState, magedd: int) -> int:
         coeffs_start = coeff(state.skill_power_final) * state.bestial_rage_coef * state.predatory_delirium_coef * state.moment_of_power_coef * self._coef_penetration(state)
@@ -866,8 +867,9 @@ class BeastMasterCalculator:
         coeffs_final = self._coef_critical_hit_skill(state) * self._coef_accuracy(state) * self._coef_bp(state) * self._coef_sacred_hero(state)
         hit = cint(self._chain_lightning_formula(state, magedd, physdd) * coeffs_start)
         dpm = cint(hit * 60 / self._chain_cooldown(state) * self._legendary_chain(state))
-        state.breakdown.chain_lightning = DamageLine(hit=hit, dpm=dpm)
-        return cint(dpm * coeffs_final)
+        final_dpm = cint(dpm * coeffs_final)
+        state.breakdown.chain_lightning = DamageLine(hit=hit, dpm=final_dpm)
+        return final_dpm
 
     def _calc_beast_awakening(self, state: CalcState, magedd: int, physdd: int) -> int:
         coeffs_start = coeff(state.attack_strength_luna) * self._coef_piercing_luna(state)
@@ -895,8 +897,9 @@ class BeastMasterCalculator:
         dpm = cint(hit * 60 / self._order_cooldown(state))
         if state.dataset.skills.bestial_rampage.active:
             dpm = cint(dpm * (1 + (state.skill.bestial_damage_multiplier - 1) * self._time_bestial_rampage(state)))
-        state.breakdown.order_to_attack = DamageLine(hit=hit, dpm=dpm)
-        return cint(dpm * coeffs_final)
+        final_dpm = cint(dpm * coeffs_final)
+        state.breakdown.order_to_attack = DamageLine(hit=hit, dpm=final_dpm)
+        return final_dpm
 
     def _calc_aura(self, state: CalcState, magedd: int) -> tuple[int, int]:
         result_luna = 0
@@ -918,49 +921,61 @@ class BeastMasterCalculator:
             if state.dataset.skills.beast_awakening.active:
                 luna_hit = cint(luna_hit * (1 if skill.talent_abuse else coef_lotus))
                 luna_dpm = cint(luna_hit * 60 / self._aura_cooldown(state) * count_luna)
-                result_luna += cint(luna_dpm * coeffs_luna_final)
-                state.breakdown.aura_luna = DamageLine(hit=luna_hit, dpm=luna_dpm)
+                luna_final_dpm = cint(luna_dpm * coeffs_luna_final)
+                result_luna += luna_final_dpm
+                state.breakdown.aura_luna = DamageLine(hit=luna_hit, dpm=luna_final_dpm)
             else:
                 state.breakdown.aura_luna = DamageLine()
             hero_hit = cint(hero_hit * (1 if skill.talent_abuse else coef_lotus))
             hero_dpm = cint(hero_hit * 60 / self._aura_cooldown(state) * count_hero)
-            result_hero += cint(hero_dpm * coeffs_hero_final)
-            state.breakdown.aura_hero = DamageLine(hit=hero_hit, dpm=hero_dpm)
+            hero_final_dpm = cint(hero_dpm * coeffs_hero_final)
+            result_hero += hero_final_dpm
+            state.breakdown.aura_hero = DamageLine(hit=hero_hit, dpm=hero_final_dpm)
             return result_luna, result_hero
 
         if state.dataset.skills.beast_awakening.active:
             luna_dpm = cint(luna_hit * 60 / self._aura_cooldown(state) * count_luna)
-            result_luna += cint(luna_dpm * coeffs_luna_final)
-            state.breakdown.aura_luna = DamageLine(hit=luna_hit, dpm=luna_dpm)
+            luna_final_dpm = cint(luna_dpm * coeffs_luna_final)
+            result_luna += luna_final_dpm
+            state.breakdown.aura_luna = DamageLine(hit=luna_hit, dpm=luna_final_dpm)
             state.breakdown.aura_hero = DamageLine()
             return result_luna, result_hero
 
         hero_dpm = cint(hero_hit * 60 / self._aura_cooldown(state) * count_hero)
-        result_hero += cint(hero_dpm * coeffs_hero_final)
-        state.breakdown.aura_hero = DamageLine(hit=hero_hit, dpm=hero_dpm)
+        hero_final_dpm = cint(hero_dpm * coeffs_hero_final)
+        result_hero += hero_final_dpm
+        state.breakdown.aura_hero = DamageLine(hit=hero_hit, dpm=hero_final_dpm)
         state.breakdown.aura_luna = DamageLine()
         return result_luna, result_hero
 
     def _calc_moonlight(self, state: CalcState, magedd: int, pure_magedd: int) -> int:
-        result = 0
+        parts: list[tuple[str, int, int]] = []
         skill = state.dataset.skills.moonlight
         coeffs_start = coeff(state.skill_power_final) * state.bestial_rage_coef * state.predatory_delirium_coef * state.long_death_coef * self._coef_penetration(state)
         coeffs_final = self._coef_critical_hit_skill(state) * self._coef_bp(state) * self._coef_sacred_hero(state)
         if skill.permanent_active:
             hit = cint(3 * self._moonlight_formula(state, cint(pure_magedd * state.coefficient_triton + magedd)) * coeffs_start)
             dpm = hit * 30
-            state.breakdown.moonlight_permanent = DamageLine(hit=hit, dpm=dpm)
-            result += dpm
+            parts.append(("permanent", hit, dpm))
         else:
             state.breakdown.moonlight_permanent = DamageLine()
         if skill.non_permanent_active:
             hit = cint(self._moonlight_formula(state, magedd) * coeffs_start)
             dpm = cint((hit * 4) / self._moonlight_cooldown(state) * 60 * self._legendary_moonlight(state))
-            state.breakdown.moonlight_non_permanent = DamageLine(hit=hit, dpm=dpm)
-            result += cint(dpm * self._coef_accuracy(state))
+            parts.append(("non_permanent", hit, cint(dpm * self._coef_accuracy(state))))
         else:
             state.breakdown.moonlight_non_permanent = DamageLine()
-        return cint(result * coeffs_final)
+
+        total = cint(sum(dpm for _, _, dpm in parts) * coeffs_final)
+        distributed = 0
+        for index, (kind, hit, dpm) in enumerate(parts):
+            final_dpm = total - distributed if index == len(parts) - 1 else cint(dpm * coeffs_final)
+            distributed += final_dpm
+            if kind == "permanent":
+                state.breakdown.moonlight_permanent = DamageLine(hit=hit, dpm=final_dpm)
+            else:
+                state.breakdown.moonlight_non_permanent = DamageLine(hit=hit, dpm=final_dpm)
+        return total
 
     def _calc_symbiosis(self, state: CalcState, magedd: int, physdd: int) -> tuple[int, int]:
         coeffs_for_luna_start = (
