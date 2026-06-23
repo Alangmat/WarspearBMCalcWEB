@@ -9,8 +9,13 @@ const tabs = [
 let state = null;
 let activeTab = "skills";
 let calculateTimer = null;
+let consumableCatalog = { items: [], stat_labels: {}, allowed_stats: {} };
 
-const icon = (path) => `/static/icons/${path}`;
+function icon(path) {
+  if (!path) return "/static/icons/other/ask.jpg";
+  if (path.startsWith("/static/") || path.startsWith("http://") || path.startsWith("https://")) return path;
+  return `/static/icons/${path}`;
+}
 
 const skillMeta = {
   moon_touch: { icon: "base/MoonTouchFramed.png", title: "Лунное касание", activePath: "skills.moon_touch.active", levelPath: "skills.moon_touch.level", maxLevel: 5 },
@@ -232,6 +237,11 @@ function clearBranchTalents(branch) {
 }
 
 function sanitizeState() {
+  if (!state.consumables) state.consumables = { potion: "", scroll: "", pet: "" };
+  state.consumables.potion = state.consumables.potion || "";
+  state.consumables.scroll = state.consumables.scroll || "";
+  state.consumables.pet = state.consumables.pet || "";
+
   const activeBranches = [
     ["dual", "talents.dual_rage_active"],
     ["forest", "talents.forest_inspiration_active"],
@@ -317,6 +327,47 @@ function selectField(path, label, options, opts = {}) {
     scheduleCalculate();
   });
   wrap.append(select);
+  return wrap;
+}
+
+function consumableEffectText(effect) {
+  const label = consumableCatalog.stat_labels?.[effect.stat] || effect.stat;
+  const value = Number(effect.value || 0);
+  const suffix = effect.stat?.endsWith("_percent") ? "%" : "";
+  if (effect.stat === "magical_power_flat" || effect.stat === "physical_power_flat") {
+    return `${label}: +${format(value)}`;
+  }
+  return `${label}: +${format(value)}${suffix}`;
+}
+
+function consumableSelector(type, path, label) {
+  const wrap = el("div", "consumable-field full");
+  wrap.append(el("div", "field-label", label));
+  const grid = el("div", "consumable-grid");
+  const empty = { id: "", name: "Без расходника", icon: "other/ask.jpg", effects: [] };
+  const items = [empty, ...consumableCatalog.items.filter((item) => item.type === type)];
+  for (const item of items) {
+    const active = get(path) === item.id;
+    const button = el("button", `consumable-option ${active ? "active" : ""}`);
+    button.type = "button";
+    button.title = item.name;
+    button.append(image(item.icon || "other/ask.jpg", "consumable-icon"));
+    const text = el("span", "consumable-text");
+    text.append(el("strong", null, item.name));
+    if (item.effects.length) {
+      text.append(el("small", null, item.effects.map(consumableEffectText).join("; ")));
+    } else if (!item.id) {
+      text.append(el("small", null, "Ручные поля ниже остаются активны"));
+    }
+    button.append(text);
+    button.addEventListener("click", () => {
+      set(path, item.id);
+      render();
+      scheduleCalculate();
+    });
+    grid.append(button);
+  }
+  wrap.append(grid);
   return wrap;
 }
 
@@ -670,6 +721,11 @@ function renderStats() {
   return [
     section("Атакующие характеристики", attackMain.map(([path, label]) => numberField(path, label))),
     section("Защитные характеристики", defenseMain.map(([path, label]) => numberField(path, label))),
+    section("Расходники", [
+      consumableSelector("potion", "consumables.potion", "Зелье"),
+      consumableSelector("scroll", "consumables.scroll", "Свиток"),
+      consumableSelector("pet", "consumables.pet", "Питомец"),
+    ], "wide"),
     section("Эликсир", pot.map(([path, label]) => numberField(path, label))),
     section("Свиток", scroll.map(([path, label]) => numberField(path, label))),
     section("Пет", pet.map(([path, label]) => numberField(path, label))),
@@ -888,6 +944,12 @@ async function loadPreset(preset) {
   calculate();
 }
 
+async function loadConsumables() {
+  const response = await fetch("/api/consumables");
+  if (!response.ok) return;
+  consumableCatalog = await response.json();
+}
+
 function downloadJson(filename, data) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -938,4 +1000,9 @@ document.getElementById("import-file").addEventListener("change", (event) => {
   event.target.value = "";
 });
 
-loadPreset("default");
+async function initialize() {
+  await loadConsumables();
+  await loadPreset("default");
+}
+
+initialize();

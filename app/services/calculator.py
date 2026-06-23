@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +18,7 @@ from app.domain.models import (
     SkillBreakdown,
     WeaponType,
 )
+from app.services.consumables import get_selected_consumables
 
 
 CONFIG_DIR = Path(__file__).resolve().parents[1] / "config" / "skills"
@@ -203,6 +204,11 @@ class CalcState:
     long_death_coef: float = 1
     animal_rage_add: float = 0
     continuous_fury_add: float = 0
+    consumable_stats: dict[str, float] = field(default_factory=dict)
+    consumable_mdd_percent: float = 0
+    consumable_pdd_percent: float = 0
+    consumable_mdd_flat: float = 0
+    consumable_pdd_flat: float = 0
 
 
 class BeastMasterCalculator:
@@ -223,6 +229,9 @@ class BeastMasterCalculator:
         )
 
         self._apply_talent_coefficients(state)
+        self._apply_consumables(state, include_timed_pet=False)
+        self._calc_stats(state)
+        self._apply_consumables(state, include_timed_pet=True)
         self._calc_stats(state)
         self._calc_percents(state)
 
@@ -236,6 +245,9 @@ class BeastMasterCalculator:
         if dataset.start_power_mods.harmonious_power:
             pure_magic = cint(pure_magic / coeff(state.harmonious_mdd))
             pure_phys = cint(pure_phys / coeff(state.harmonious_pdd))
+
+        pure_magic = cint(pure_magic + state.consumable_mdd_flat)
+        pure_phys = cint(pure_phys + state.consumable_pdd_flat)
 
         magicdd = cint(
             pure_magic * (state.coefficient_triton * self._merman_duration(state) + coef_rage)
@@ -390,6 +402,55 @@ class BeastMasterCalculator:
         state.long_death_coef = {0: 1, 1: 1.005, 2: 1.01, 3: 1.015, 4: 1.02}.get(talents.long_death_level, 1)
         state.continuous_fury_add = {0: 0, 1: 0.5, 2: 1, 3: 1.5}.get(talents.continuous_fury_level, 0)
 
+    def _apply_consumables(self, state: CalcState, *, include_timed_pet: bool) -> None:
+        state.consumable_stats = {}
+        state.consumable_mdd_percent = 0
+        state.consumable_pdd_percent = 0
+        state.consumable_mdd_flat = 0
+        state.consumable_pdd_flat = 0
+
+        for item in get_selected_consumables(state.dataset.consumables):
+            for effect in item.effects:
+                multiplier = 1.0
+                if item.type == "pet":
+                    passive = effect.passive or item.passive
+                    if passive:
+                        multiplier = 1.0
+                    elif include_timed_pet:
+                        duration = effect.duration or item.duration
+                        cooldown = effect.cooldown or item.cooldown
+                        multiplier = self._pet_effect_uptime(state, duration, cooldown)
+                    else:
+                        multiplier = 0.0
+
+                value = self._scaled_consumable_value(effect.value, multiplier)
+                if effect.stat == "magical_power_percent":
+                    state.consumable_mdd_percent += value
+                elif effect.stat == "physical_power_percent":
+                    state.consumable_pdd_percent += value
+                elif effect.stat == "magical_power_flat":
+                    state.consumable_mdd_flat += value
+                elif effect.stat == "physical_power_flat":
+                    state.consumable_pdd_flat += value
+                else:
+                    state.consumable_stats[effect.stat] = state.consumable_stats.get(effect.stat, 0) + value
+
+    def _pet_effect_uptime(self, state: CalcState, duration: float, cooldown: float) -> float:
+        if duration <= 0 or cooldown <= 0:
+            return 0
+        return min(max(duration * coeff(state.facilitation_final) / cooldown, 0), 1)
+
+    @staticmethod
+    def _scaled_consumable_value(value: float, multiplier: float) -> float:
+        scaled = value * multiplier
+        if value >= 0:
+            return min(scaled, value)
+        return max(scaled, value)
+
+    @staticmethod
+    def _consumable_stat(state: CalcState, stat: str) -> float:
+        return state.consumable_stats.get(stat, 0)
+
     def _calc_stats(self, state: CalcState) -> None:
         self._calc_skill_cooldown(state)
         self._calc_attack_speed(state)
@@ -409,6 +470,7 @@ class BeastMasterCalculator:
         mods = state.dataset.mods
         final_mods = state.dataset.final_power_mods
         value = stats.main.skill_cooldown + stats.pot.skill_cooldown + stats.scroll.skill_cooldown + stats.pet.skill_cooldown
+        value += self._consumable_stat(state, "skill_cooldown")
         if final_mods.castle_damage:
             value += 5
         if state.dataset.skills.double_concentration.active:
@@ -422,6 +484,7 @@ class BeastMasterCalculator:
     def _calc_attack_speed(self, state: CalcState) -> None:
         stats = state.dataset.stats
         value = stats.main.attack_speed + stats.pot.attack_speed + stats.scroll.attack_speed + stats.pet.attack_speed
+        value += self._consumable_stat(state, "attack_speed")
         if state.dataset.final_power_mods.castle_damage:
             value += 5
         if state.dataset.skills.double_concentration.active:
@@ -436,6 +499,7 @@ class BeastMasterCalculator:
         stats = state.dataset.stats
         mods = state.dataset.mods
         value = stats.main.critical_hit + stats.pot.critical_hit + stats.scroll.critical_hit
+        value += self._consumable_stat(state, "critical_hit")
         if state.dataset.final_power_mods.castle_damage:
             value += 5
         if state.dataset.skills.blessing_of_the_moon.active:
@@ -453,6 +517,7 @@ class BeastMasterCalculator:
     def _calc_critical_damage(self, state: CalcState) -> None:
         stats = state.dataset.stats
         value = stats.main.critical_damage + stats.pot.critical_damage + stats.scroll.critical_damage + stats.pet.critical_damage
+        value += self._consumable_stat(state, "critical_damage")
         if state.dataset.skills.double_concentration.active:
             value += state.skill.double_crit_damage
         if state.dataset.mods.gods_aid_hero:
@@ -470,6 +535,7 @@ class BeastMasterCalculator:
     def _calc_penetration(self, state: CalcState) -> None:
         stats = state.dataset.stats
         value = stats.main.penetration + stats.pot.penetration + stats.scroll.penetration + stats.pet.penetration
+        value += self._consumable_stat(state, "penetration")
         if state.dataset.final_power_mods.castle_damage:
             value += 5
         if state.dataset.skills.blessing_of_the_moon.active:
@@ -501,6 +567,7 @@ class BeastMasterCalculator:
     def _calc_accuracy(self, state: CalcState) -> None:
         stats = state.dataset.stats
         value = stats.main.accuracy + stats.pot.accuracy + stats.scroll.accuracy + stats.pet.accuracy
+        value += self._consumable_stat(state, "accuracy")
         if state.dataset.final_power_mods.castle_damage:
             value += 5
         if state.dataset.mods.irreversible_anger:
@@ -519,6 +586,7 @@ class BeastMasterCalculator:
     def _calc_attack_strength(self, state: CalcState) -> None:
         stats = state.dataset.stats
         value = stats.main.attack_strength + stats.pot.attack_strength + stats.scroll.attack_strength + stats.pet.attack_strength
+        value += self._consumable_stat(state, "attack_strength")
         state.attack_strength_luna = value
         state.attack_strength_hero = clamp(value, StatsLimit.MAX_ATTACK_STRENGTH)
         if state.dataset.mods.predatory_bond_talent_almahad:
@@ -527,16 +595,19 @@ class BeastMasterCalculator:
     def _calc_piercing_attack(self, state: CalcState) -> None:
         stats = state.dataset.stats
         value = stats.main.piercing_attack + stats.pot.piercing_attack + stats.scroll.piercing_attack
+        value += self._consumable_stat(state, "piercing_attack")
         state.piercing_attack_final = clamp(value, StatsLimit.MAX_PIERCING_ATTACK)
 
     def _calc_rage(self, state: CalcState) -> None:
         stats = state.dataset.stats
         value = stats.main.rage + stats.pot.rage + stats.scroll.rage + stats.pet.rage
+        value += self._consumable_stat(state, "rage")
         state.rage_final = clamp(value, StatsLimit.MAX_RAGE)
 
     def _calc_facilitation(self, state: CalcState) -> None:
         stats = state.dataset.stats
         value = stats.main.facilitation + stats.pot.facilitation + stats.scroll.facilitation + stats.pet.facilitation
+        value += self._consumable_stat(state, "facilitation")
         state.facilitation_luna = value
         state.facilitation_final = clamp(value, StatsLimit.MAX_FACILITATION)
 
@@ -548,6 +619,7 @@ class BeastMasterCalculator:
         value -= round((start_castle_coef - 1) * 100, 1)
         value = max(value, 0)
         value += stats.pot.skill_power
+        value += self._consumable_stat(state, "skill_power")
         if state.dataset.mods.dragon_eye_level > 0:
             value += 14
         value += round((final_castle_coef - 1) * 100, 1)
@@ -556,6 +628,7 @@ class BeastMasterCalculator:
     def _calc_depths_fury(self, state: CalcState) -> None:
         stats = state.dataset.stats
         value = stats.main.depths_fury + stats.scroll.depths_fury
+        value += self._consumable_stat(state, "depths_fury")
         state.depths_fury_final = clamp(value, StatsLimit.MAX_DEPTH_FURY)
 
     def _calc_percents(self, state: CalcState) -> None:
@@ -600,6 +673,7 @@ class BeastMasterCalculator:
                 value += 20
             if state.dataset.mods.templar_active:
                 value += 17.4
+            value += state.consumable_mdd_percent if damage_type == "magical" else state.consumable_pdd_percent
         value += power_mods.additional_mdd if damage_type == "magical" else power_mods.additional_pdd
         return value
 

@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app.domain.models import CalculationResult, DataSetBM, PresetRequest
 from app.services.build_io import export_legacy_build, import_build
 from app.services.calculator import calculator
+from app.services.consumables import ConsumableCatalog, load_consumable_catalog
 from app.services.state_rules import normalize_dataset
 
 
@@ -69,6 +70,11 @@ def get_preset(request: PresetRequest) -> DataSetBM:
 @app.post("/api/calculate", response_model=CalculationResult)
 def calculate(dataset: DataSetBM) -> CalculationResult:
     return calculator.calculate(normalize_dataset(dataset))
+
+
+@app.get("/api/consumables", response_model=ConsumableCatalog)
+def get_consumables() -> ConsumableCatalog:
+    return load_consumable_catalog()
 
 
 @app.post("/api/build/import", response_model=DataSetBM)

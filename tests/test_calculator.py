@@ -2,6 +2,7 @@ from app.domain.models import DataSetBM
 from app.main import default_dataset
 from app.services.build_io import export_legacy_build, import_build
 from app.services.calculator import calculator
+from app.services.consumables import ConsumableEffect, ConsumableItem
 from app.services.state_rules import normalize_dataset
 
 
@@ -119,3 +120,55 @@ def test_export_legacy_build_contains_old_shape() -> None:
     assert exported["MaceSelected"] is True
     assert exported["GuardianUnityActive"] is True
     assert exported["HasTalentHarmoniousPower"] is True
+
+
+def test_consumable_stat_is_added_before_final_cap(monkeypatch) -> None:
+    data = DataSetBM()
+    data.stats.main.critical_hit = 50
+    data.consumables.potion = "crit_potion"
+    item = ConsumableItem(
+        id="crit_potion",
+        type="potion",
+        name="Crit potion",
+        effects=[ConsumableEffect(stat="critical_hit", value=10)],
+    )
+    monkeypatch.setattr("app.services.calculator.get_selected_consumables", lambda selection: [item])
+
+    result = calculator.calculate(data)
+
+    assert result.final_stats.critical_hit_hero == 53
+
+
+def test_scroll_flat_power_is_added_before_final_percents(monkeypatch) -> None:
+    data = DataSetBM()
+    data.stats.main.magical_damage = 1040
+    data.consumables.scroll = "magic_scroll"
+    item = ConsumableItem(
+        id="magic_scroll",
+        type="scroll",
+        name="Magic scroll",
+        effects=[ConsumableEffect(stat="magical_power_flat", value=100)],
+    )
+    monkeypatch.setattr("app.services.calculator.get_selected_consumables", lambda selection: [item])
+
+    result = calculator.calculate(data)
+
+    assert result.final_stats.pure_magical_damage == 1100
+    assert result.final_stats.effective_magical_damage == 1144
+
+
+def test_timed_pet_bonus_uses_facilitation_uptime(monkeypatch) -> None:
+    data = DataSetBM()
+    data.stats.main.facilitation = 50
+    data.consumables.pet = "speed_pet"
+    item = ConsumableItem(
+        id="speed_pet",
+        type="pet",
+        name="Speed pet",
+        effects=[ConsumableEffect(stat="attack_speed", value=20, duration=10, cooldown=20)],
+    )
+    monkeypatch.setattr("app.services.calculator.get_selected_consumables", lambda selection: [item])
+
+    result = calculator.calculate(data)
+
+    assert result.final_stats.attack_speed == 15

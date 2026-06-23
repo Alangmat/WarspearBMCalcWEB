@@ -283,6 +283,7 @@ def export_legacy_build(dataset: DataSetBM, result_dd: int = 0) -> dict[str, Any
         "SwordSelected": data.weapon == WeaponType.sword,
         "AxeSelected": data.weapon == WeaponType.axe,
         "AuraTalentAbuse": data.skills.aura_of_the_forest.talent_abuse,
+        "Consumables": data.consumables.model_dump(),
     }
     return old
 
@@ -432,6 +433,11 @@ def _from_legacy_build(old: dict[str, Any]) -> DataSetBM:
     data.talents.long_death_level = _level(old.get("LvlTalantLongDeath"), 0, 4)
     data.talents.continuous_fury_level = _level(old.get("LvlTalantContinuousFury"), 0, 3)
     data.skills.aura_of_the_forest.talent_abuse = _bool(old.get("AuraTalentAbuse"))
+    if isinstance(old.get("Consumables"), dict):
+        consumables = old["Consumables"]
+        data.consumables.potion = str(consumables.get("potion") or consumables.get("Potion") or "")
+        data.consumables.scroll = str(consumables.get("scroll") or consumables.get("Scroll") or "")
+        data.consumables.pet = str(consumables.get("pet") or consumables.get("Pet") or "")
     return data
 
 

@@ -307,6 +307,12 @@ class EquipmentPercents(BaseModel):
     boots: EquipmentMaterial = EquipmentMaterial.none
 
 
+class ConsumableSelection(BaseModel):
+    potion: str = ""
+    scroll: str = ""
+    pet: str = ""
+
+
 class DataSetBM(BaseModel):
     name: str = "New Data Set"
     description: str = ""
@@ -319,6 +325,7 @@ class DataSetBM(BaseModel):
     talents: TalentSet = Field(default_factory=TalentSet)
     percents: JewelryPercents = Field(default_factory=JewelryPercents)
     equipment: EquipmentPercents = Field(default_factory=EquipmentPercents)
+    consumables: ConsumableSelection = Field(default_factory=ConsumableSelection)
 
 
 class PresetRequest(BaseModel):
