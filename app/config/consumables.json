@@ -1,4 +1,161 @@
 {
   "version": 1,
-  "items": []
+  "items": [
+    {
+      "id": "item_2052e8b5",
+      "type": "potion",
+      "name": "Джулеп",
+      "icon": "consumables/chrome_sAlNlJW33l_84aafd.png",
+      "effects": [
+        {
+          "stat": "skill_cooldown",
+          "value": 10.0
+        },
+        {
+          "stat": "magical_power_percent",
+          "value": 15.0
+        }
+      ]
+    },
+    {
+      "id": "item_d12a1373",
+      "type": "pet",
+      "name": "Дракончик",
+      "icon": "consumables/Discord_uGXdYORH9c.png",
+      "effects": [
+        {
+          "stat": "penetration",
+          "value": 10.0,
+          "passive": true
+        },
+        {
+          "stat": "magical_power_percent",
+          "value": 20.0,
+          "passive": false,
+          "duration": 14.0,
+          "cooldown": 20.0
+        },
+        {
+          "stat": "physical_power_percent",
+          "value": 15.0,
+          "passive": false,
+          "duration": 14.0,
+          "cooldown": 20.0
+        }
+      ]
+    },
+    {
+      "id": "item_8c0b30b4",
+      "type": "scroll",
+      "name": "Физдд Орк",
+      "icon": "consumables/13.png",
+      "effects": [
+        {
+          "stat": "physical_power_percent",
+          "value": 15.0
+        },
+        {
+          "stat": "facilitation",
+          "value": 15.0
+        }
+      ]
+    },
+    {
+      "id": "item_cee722ce",
+      "type": "scroll",
+      "name": "Магдд Орк",
+      "icon": "consumables/18.png",
+      "effects": [
+        {
+          "stat": "magical_power_percent",
+          "value": 20.0
+        },
+        {
+          "stat": "facilitation",
+          "value": 15.0
+        }
+      ]
+    },
+    {
+      "id": "item_31e3b8f2",
+      "type": "scroll",
+      "name": "Орк",
+      "icon": "consumables/56.png",
+      "effects": [
+        {
+          "stat": "facilitation",
+          "value": 30.0
+        }
+      ]
+    },
+    {
+      "id": "item_98dd51ac",
+      "type": "scroll",
+      "name": "Магдд Песок",
+      "icon": "consumables/52.png",
+      "effects": [
+        {
+          "stat": "magical_power_flat",
+          "value": 107.0
+        }
+      ]
+    },
+    {
+      "id": "item_e10ee8df",
+      "type": "scroll",
+      "name": "Физдд Песок",
+      "icon": "consumables/p95azRms6R.png",
+      "effects": [
+        {
+          "stat": "physical_power_flat",
+          "value": 79.0
+        }
+      ]
+    },
+    {
+      "id": "item_3404a02b",
+      "type": "pet",
+      "name": "Скарабей",
+      "icon": "consumables/jQPEyQoWiT_9eed25.png",
+      "effects": [
+        {
+          "stat": "skill_power",
+          "value": 12.0,
+          "passive": true
+        }
+      ]
+    },
+    {
+      "id": "item_abf5f133",
+      "type": "potion",
+      "name": "Сила навыков",
+      "icon": "consumables/odPHwKVo44_8766bb.png",
+      "effects": [
+        {
+          "stat": "skill_power",
+          "value": 15.0
+        }
+      ]
+    },
+    {
+      "id": "item_ceaaa139",
+      "type": "pet",
+      "name": "Конь",
+      "icon": "consumables/68_729992.png",
+      "effects": [
+        {
+          "stat": "facilitation",
+          "value": 18.0,
+          "passive": true
+        },
+        {
+          "stat": "skill_cooldown",
+          "value": 20.0,
+          "passive": false,
+          "duration": 30.0,
+          "cooldown": 60.0
+        }
+      ]
+    }
+  ]
 }
