@@ -90,6 +90,7 @@ ALLOWED_STATS = {
         "attack_strength",
         "rage",
         "facilitation",
+        "skill_power",
         "magical_power_percent",
         "physical_power_percent",
     ],

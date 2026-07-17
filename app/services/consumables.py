@@ -73,6 +73,7 @@ ALLOWED_STATS: dict[str, set[str]] = {
         "attack_strength",
         "rage",
         "facilitation",
+        "skill_power",
         "magical_power_percent",
         "physical_power_percent",
     },

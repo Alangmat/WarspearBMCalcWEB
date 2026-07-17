@@ -2,7 +2,7 @@ from app.domain.models import DataSetBM
 from app.main import default_dataset
 from app.services.build_io import export_legacy_build, import_build
 from app.services.calculator import calculator
-from app.services.consumables import ConsumableEffect, ConsumableItem
+from app.services.consumables import ConsumableEffect, ConsumableItem, load_consumable_catalog
 from app.services.state_rules import normalize_dataset
 
 
@@ -172,3 +172,29 @@ def test_timed_pet_bonus_uses_facilitation_uptime(monkeypatch) -> None:
     result = calculator.calculate(data)
 
     assert result.final_stats.attack_speed == 15
+
+
+def test_pet_consumable_catalog_allows_skill_power(tmp_path) -> None:
+    path = tmp_path / "consumables.json"
+    path.write_text(
+        """
+        {
+          "version": 1,
+          "items": [
+            {
+              "id": "skill_pet",
+              "type": "pet",
+              "name": "Skill pet",
+              "effects": [
+                {"stat": "skill_power", "value": 10, "passive": true}
+              ]
+            }
+          ]
+        }
+        """,
+        encoding="utf-8",
+    )
+
+    catalog = load_consumable_catalog(path)
+
+    assert catalog.items[0].effects[0].stat == "skill_power"
