@@ -148,6 +148,8 @@ const finalStatIcons = {
   facilitation_luna: "stats/Facilitation.png",
   skill_power: "stats/SkillPower.png",
   depths_fury: "stats/DepthsFury.png",
+  exhausting_heat: "stats/ExhaustingHeat.png",
+  effective_resilience: "stats/Resilience.png",
   effective_magical_damage: "stats/mdd.png",
   effective_physical_damage: "stats/pdd.png",
 };
@@ -315,6 +317,17 @@ function numberField(path, label, opts = {}) {
     scheduleCalculate();
   });
   wrap.append(input);
+  return wrap;
+}
+
+function readonlyStat(id, label, iconPath) {
+  const wrap = el("div", "field number-field readonly-field");
+  const caption = el("span", "field-label");
+  if (iconPath) caption.append(image(iconPath, "label-icon"));
+  caption.append(el("span", null, label));
+  const value = el("strong", "readonly-value", "0");
+  value.id = id;
+  wrap.append(caption, value);
   return wrap;
 }
 
@@ -689,6 +702,8 @@ function renderStats() {
     ["stats.main.dodge", "Уклонение цели"],
     ["stats.main.resilience", "Устойчивость цели"],
   ];
+  const defenseFields = defenseMain.map(([path, label]) => numberField(path, label));
+  defenseFields.push(readonlyStat("effective-resilience-inline", "Итоговая устойчивость", "stats/Resilience.png"));
   const pot = [
     ["stats.pot.skill_cooldown", "Перезарядка навыков"],
     ["stats.pot.attack_speed", "Скорость атаки"],
@@ -727,7 +742,7 @@ function renderStats() {
   ];
   return [
     section("Атакующие характеристики", attackMain.map(([path, label, opts]) => numberField(path, label, opts || {}))),
-    section("Защитные характеристики", defenseMain.map(([path, label]) => numberField(path, label))),
+    section("Защитные характеристики", defenseFields),
     section("Расходники", [
       consumableSelector("potion", "consumables.potion", "Зелье"),
       consumableSelector("scroll", "consumables.scroll", "Свиток"),
@@ -883,6 +898,8 @@ function updateResult(result) {
   document.getElementById("total-dpm").textContent = format(result.totals.total);
   document.getElementById("hero-dpm").textContent = format(result.totals.hero);
   document.getElementById("luna-dpm").textContent = format(result.totals.luna);
+  const inlineResilience = document.getElementById("effective-resilience-inline");
+  if (inlineResilience) inlineResilience.textContent = format(result.final_stats.effective_resilience);
 
   const breakdown = document.getElementById("breakdown");
   breakdown.innerHTML = "";
@@ -927,6 +944,8 @@ function updateResult(result) {
     ["facilitation_luna", "Содействие Луны", result.final_stats.facilitation_luna],
     ["skill_power", "Сила навыков", result.final_stats.skill_power],
     ["depths_fury", "Гнев глубин", result.final_stats.depths_fury],
+    ["exhausting_heat", "Истощающий зной", result.final_stats.exhausting_heat],
+    ["effective_resilience", "Итоговая устойчивость", result.final_stats.effective_resilience],
     ["effective_magical_damage", "Итоговый магический урон", result.final_stats.effective_magical_damage],
     ["effective_physical_damage", "Итоговый физический урон", result.final_stats.effective_physical_damage],
   ];

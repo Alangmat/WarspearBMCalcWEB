@@ -204,9 +204,30 @@ def test_exhausting_heat_reduces_resilience_not_below_zero() -> None:
     data = DataSetBM()
     data.stats.main.resilience = 40
     data.stats.main.exhausting_heat = 45
-    state = type("State", (), {"dataset": data, "consumable_stats": {}})()
 
-    assert calculator._effective_resilience(state) == 0
+    result = calculator.calculate(data)
+
+    assert result.final_stats.exhausting_heat == 45
+    assert result.final_stats.effective_resilience == 0
+
+
+def test_exhausting_heat_is_capped_at_50_with_consumables(monkeypatch) -> None:
+    data = DataSetBM()
+    data.stats.main.resilience = 60
+    data.stats.main.exhausting_heat = 45
+    data.consumables.scroll = "heat_scroll"
+    item = ConsumableItem(
+        id="heat_scroll",
+        type="scroll",
+        name="Heat scroll",
+        effects=[ConsumableEffect(stat="exhausting_heat", value=20)],
+    )
+    monkeypatch.setattr("app.services.calculator.get_selected_consumables", lambda selection: [item])
+
+    result = calculator.calculate(data)
+
+    assert result.final_stats.exhausting_heat == 50
+    assert result.final_stats.effective_resilience == 10
 
 
 def test_consumable_catalog_allows_exhausting_heat(tmp_path) -> None:

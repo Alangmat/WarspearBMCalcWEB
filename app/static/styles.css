@@ -359,6 +359,18 @@ select {
   padding: 0 5px;
 }
 
+.readonly-value {
+  width: 64px;
+  height: 34px;
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: rgba(63, 63, 40, 0.55);
+  border: 1px solid rgba(214, 189, 92, 0.42);
+  font-size: 14px;
+}
+
 .consumable-field {
   display: grid;
   gap: 7px;

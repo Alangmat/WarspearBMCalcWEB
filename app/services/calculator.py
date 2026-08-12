@@ -347,6 +347,8 @@ class BeastMasterCalculator:
             facilitation_luna=state.facilitation_luna,
             skill_power=state.skill_power_final,
             depths_fury=state.depths_fury_final,
+            exhausting_heat=self._final_exhausting_heat(state),
+            effective_resilience=self._effective_resilience(state),
             effective_magical_damage=magicdd,
             effective_physical_damage=physdd,
             pure_magical_damage=pure_magic,
@@ -452,8 +454,12 @@ class BeastMasterCalculator:
         return state.consumable_stats.get(stat, 0)
 
     def _effective_resilience(self, state: CalcState) -> float:
-        heat = state.dataset.stats.main.exhausting_heat + self._consumable_stat(state, "exhausting_heat")
+        heat = self._final_exhausting_heat(state)
         return max(state.dataset.stats.main.resilience - heat, 0)
+
+    def _final_exhausting_heat(self, state: CalcState) -> float:
+        value = state.dataset.stats.main.exhausting_heat + self._consumable_stat(state, "exhausting_heat")
+        return clamp(value, 50)
 
     def _calc_stats(self, state: CalcState) -> None:
         self._calc_skill_cooldown(state)

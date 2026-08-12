@@ -91,6 +91,8 @@ class FinalStats(BaseModel):
     facilitation_luna: float = 0
     skill_power: float = 0
     depths_fury: float = 0
+    exhausting_heat: float = 0
+    effective_resilience: float = 0
     effective_magical_damage: int = 0
     effective_physical_damage: int = 0
     pure_magical_damage: int = 0
