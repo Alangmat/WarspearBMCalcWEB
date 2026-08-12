@@ -120,6 +120,7 @@ class MainStats(BaseModel):
     protection: float = 0
     dodge: float = 0
     resilience: float = 0
+    exhausting_heat: float = Field(default=0, ge=0, le=50)
     skill_power: float = 0
 
 

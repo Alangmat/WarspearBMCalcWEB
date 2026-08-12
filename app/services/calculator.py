@@ -451,6 +451,10 @@ class BeastMasterCalculator:
     def _consumable_stat(state: CalcState, stat: str) -> float:
         return state.consumable_stats.get(stat, 0)
 
+    def _effective_resilience(self, state: CalcState) -> float:
+        heat = state.dataset.stats.main.exhausting_heat + self._consumable_stat(state, "exhausting_heat")
+        return max(state.dataset.stats.main.resilience - heat, 0)
+
     def _calc_stats(self, state: CalcState) -> None:
         self._calc_skill_cooldown(state)
         self._calc_attack_speed(state)
@@ -860,23 +864,23 @@ class BeastMasterCalculator:
 
     def _coef_critical_hit_auto(self, state: CalcState) -> float:
         addition = 20 * (1 - state.critical_hit_hero / 100) if state.dataset.mods.irreversible_anger else 0
-        crit = ((state.critical_hit_hero + addition) - state.dataset.stats.main.resilience) / 100
+        res = self._effective_resilience(state)
+        crit = ((state.critical_hit_hero + addition) - res) / 100
         crit = min(max(crit, 0), 1)
-        res = state.dataset.stats.main.resilience
         depth = coeff(state.depths_fury_final)
         return ((1 - res / 100) * (1 - crit) + (1 - res / 100) ** 2 * crit * (2 + state.critical_damage_hero / 100) * depth) * depth
 
     def _coef_critical_hit_luna(self, state: CalcState) -> float:
-        crit = (state.critical_hit_luna - state.dataset.stats.main.resilience) / 100
+        res = self._effective_resilience(state)
+        crit = (state.critical_hit_luna - res) / 100
         crit = min(max(crit, 0), 1)
-        res = state.dataset.stats.main.resilience
         depth = coeff(state.depths_fury_final)
         return ((1 - res / 100) * (1 - crit) + (1 - res / 100) ** 2 * crit * (2 + state.critical_damage_luna / 100) * depth) * depth
 
     def _coef_critical_hit_skill(self, state: CalcState) -> float:
-        crit = (state.critical_hit_hero - state.dataset.stats.main.resilience) / 100
+        res = self._effective_resilience(state)
+        crit = (state.critical_hit_hero - res) / 100
         crit = min(max(crit, 0), 1)
-        res = state.dataset.stats.main.resilience
         crit_damage = state.critical_damage_hero + (30 if state.dataset.mods.crushing_will else 0)
         depth = coeff(state.depths_fury_final)
         return (

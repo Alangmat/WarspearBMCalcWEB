@@ -105,6 +105,7 @@ const statIcons = {
   "stats.main.protection": "stats/Protection.png",
   "stats.main.dodge": "stats/Dodge.png",
   "stats.main.resilience": "stats/Resilience.png",
+  "stats.main.exhausting_heat": "stats/ExhaustingHeat.png",
 };
 
 const statIconByName = {
@@ -125,6 +126,7 @@ const statIconByName = {
   protection: "stats/Protection.png",
   dodge: "stats/Dodge.png",
   resilience: "stats/Resilience.png",
+  exhausting_heat: "stats/ExhaustingHeat.png",
 };
 
 const finalStatIcons = {
@@ -301,11 +303,15 @@ function numberField(path, label, opts = {}) {
   input.type = "number";
   input.step = opts.step || "0.1";
   input.min = opts.min ?? 0;
+  if (opts.max !== undefined) input.max = opts.max;
   input.inputMode = "decimal";
   input.size = 5;
   input.value = get(path);
   input.addEventListener("input", () => {
-    set(path, Number(input.value || 0));
+    let value = Number(input.value || 0);
+    if (opts.min !== undefined) value = Math.max(Number(opts.min), value);
+    if (opts.max !== undefined) value = Math.min(Number(opts.max), value);
+    set(path, value);
     scheduleCalculate();
   });
   wrap.append(input);
@@ -664,18 +670,19 @@ function renderStats() {
   const attackMain = [
     ["stats.main.magical_damage", "Магический урон"],
     ["stats.main.physical_damage", "Физический урон"],
-    ["stats.main.skill_cooldown", "Перезарядка навыков"],
-    ["stats.main.attack_speed", "Скорость атаки"],
     ["stats.main.critical_hit", "Критический удар"],
-    ["stats.main.critical_damage", "Критический урон"],
-    ["stats.main.penetration", "Пробивная способность"],
+    ["stats.main.critical_damage", "Сила критического удара"],
     ["stats.main.accuracy", "Точность"],
-    ["stats.main.attack_strength", "Сила атаки"],
-    ["stats.main.piercing_attack", "Пронзающая атака"],
+    ["stats.main.attack_speed", "Скорость атаки"],
+    ["stats.main.penetration", "Пробивная способность"],
+    ["stats.main.skill_cooldown", "Перезарядка навыков"],
     ["stats.main.rage", "Ярость"],
-    ["stats.main.facilitation", "Содействие"],
-    ["stats.main.skill_power", "Сила навыков"],
+    ["stats.main.attack_strength", "Сила атаки"],
     ["stats.main.depths_fury", "Гнев глубин"],
+    ["stats.main.piercing_attack", "Пронзающая атака"],
+    ["stats.main.exhausting_heat", "Истощающий зной", { max: 50 }],
+    ["stats.main.skill_power", "Сила навыков"],
+    ["stats.main.facilitation", "Содействие"],
   ];
   const defenseMain = [
     ["stats.main.protection", "Защита цели"],
@@ -719,7 +726,7 @@ function renderStats() {
     ["stats.pet.facilitation", "Содействие"],
   ];
   return [
-    section("Атакующие характеристики", attackMain.map(([path, label]) => numberField(path, label))),
+    section("Атакующие характеристики", attackMain.map(([path, label, opts]) => numberField(path, label, opts || {}))),
     section("Защитные характеристики", defenseMain.map(([path, label]) => numberField(path, label))),
     section("Расходники", [
       consumableSelector("potion", "consumables.potion", "Зелье"),

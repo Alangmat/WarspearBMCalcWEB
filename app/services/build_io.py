@@ -180,6 +180,7 @@ def export_legacy_build(dataset: DataSetBM, result_dd: int = 0) -> dict[str, Any
         "Protection": data.stats.main.protection,
         "Dodge": data.stats.main.dodge,
         "Resilience": data.stats.main.resilience,
+        "ExhaustingHeat": data.stats.main.exhausting_heat,
         "SkillPower": data.stats.main.skill_power,
         "SkillCooldownPot": data.stats.pot.skill_cooldown,
         "AttackSpeedPot": data.stats.pot.attack_speed,
@@ -307,6 +308,7 @@ def _from_legacy_build(old: dict[str, Any]) -> DataSetBM:
     data.stats.main.protection = _number(old.get("Protection"))
     data.stats.main.dodge = _number(old.get("Dodge"))
     data.stats.main.resilience = _number(old.get("Resilience"))
+    data.stats.main.exhausting_heat = min(max(_number(old.get("ExhaustingHeat")), 0), 50)
     data.stats.main.skill_power = _number(old.get("SkillPower"))
 
     for target, suffix in (

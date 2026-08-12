@@ -198,3 +198,38 @@ def test_pet_consumable_catalog_allows_skill_power(tmp_path) -> None:
     catalog = load_consumable_catalog(path)
 
     assert catalog.items[0].effects[0].stat == "skill_power"
+
+
+def test_exhausting_heat_reduces_resilience_not_below_zero() -> None:
+    data = DataSetBM()
+    data.stats.main.resilience = 40
+    data.stats.main.exhausting_heat = 45
+    state = type("State", (), {"dataset": data, "consumable_stats": {}})()
+
+    assert calculator._effective_resilience(state) == 0
+
+
+def test_consumable_catalog_allows_exhausting_heat(tmp_path) -> None:
+    path = tmp_path / "consumables.json"
+    path.write_text(
+        """
+        {
+          "version": 1,
+          "items": [
+            {
+              "id": "heat_scroll",
+              "type": "scroll",
+              "name": "Heat scroll",
+              "effects": [
+                {"stat": "exhausting_heat", "value": 10}
+              ]
+            }
+          ]
+        }
+        """,
+        encoding="utf-8",
+    )
+
+    catalog = load_consumable_catalog(path)
+
+    assert catalog.items[0].effects[0].stat == "exhausting_heat"
